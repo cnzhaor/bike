@@ -21,8 +21,7 @@ return [
     //如果需要全局替换的话，可以直接在配置文件中添加：
 
     'view_replace_str'  =>  [
-        //使用绝对路径
-        '__ADMIN__'=>'http://localhost/bike/public/static/admin/',
+        '__ADMIN__'=> '/static/admin/',
         ]
 
 ];
