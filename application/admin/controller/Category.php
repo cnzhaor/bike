@@ -15,7 +15,8 @@ class Category extends Common
      */
     public function index()
     {
-        $cats = CatModel::all();
+        $catModel = new CatModel();
+        $cats = $catModel->getAll();
         $this->assign('cats', $cats);
         return view();
     }
@@ -27,7 +28,8 @@ class Category extends Common
      */
     public function create()
     {
-        $cats = CatModel::all();
+        $catModel = new CatModel();
+        $cats = $catModel->getAll();
         $this->assign('cats', $cats);
         return view();
     }
@@ -43,7 +45,10 @@ class Category extends Common
         if($request)
         {
             $catModel = new CatModel();
-            $catModel->save($request->param());
+            if($catModel->save($request->param()))
+                $this->success('新增成功！',url('index'));
+            else
+                $this->error('新增失败！');
         }
     }
 
@@ -66,7 +71,29 @@ class Category extends Common
      */
     public function edit($id)
     {
-        //
+        //获取要修改的对象
+        if($data = catModel::get($id)){
+            if(request()->isPost()){
+                if ($data -> save(input('post.')))
+                    $this->success('修改成功！',url('index'));
+                else
+                    $this->error('修改失败！');
+            }
+            else{
+                $catModel = new CatModel();
+                $cats = $catModel->getAll();
+                $cat = catModel::getById($id);
+                $this->assign([
+                    'cats'=> $cats,
+                    'cat'=> $cat,
+                ]);
+                return view();
+            }
+        }
+        else
+            $this->error('非法操作！');
+
+
     }
 
     /**
@@ -89,6 +116,26 @@ class Category extends Common
      */
     public function delete($id)
     {
-        //
+        $pCat = catModel::getByPid($id);
+        if($pCat)
+            $this->error('请先删除它的子分类');
+        else{
+            if(catModel::destroy($id))
+                $this->success('删除成功！',url('index'));
+            else
+                $this->error('删除失败！');
+        }
+    }
+    
+    public function sort()
+    {
+        if(request()->isPost()){
+            foreach (input('post.') as $key => $value){
+                catModel::update(['id' => $key, 'sort' => $value]);
+            }
+            $this->redirect('index');
+        }
+        else
+            $this->error('非法操作！',url('index'));
     }
 }
